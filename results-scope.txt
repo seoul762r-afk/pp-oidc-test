@@ -5,7 +5,7 @@ package     : audit-lab/oidc-scope-test
 repository  : seoul762r-afk/pp-oidc-test
 workflow ref: seoul762r-afk/pp-oidc-test/.github/workflows/probe-v2.yml@refs/heads/main
 event       : push
-run id      : 37842878138
+run id      : 37844084653
 
 === STEP 1: EXCHANGE (must succeed, or nothing below is interpretable) ===
   POST /api/oidc/token-exchange/audit-lab-gt/audit-lab/oidc-scope-test -> HTTP 200
@@ -14,3 +14,35 @@ run id      : 37842878138
 === STEP 2: IN-SCOPE CONTROL - publish an artifact ===
   the operation this credential exists for must SUCCEED, otherwise
   every later denial is uninterpretable
+  artifact: artifact.tar.gz, 61 bytes
+  POST /api/packages/artifacts/            -> 400
+  body: {"status":"error","message":"Invalid signature","documentationUrl":"https:\/\/packagist.com\/docs\/api"}
+  artifact id: None
+
+=== STEP 3: CROSS-PACKAGE WRITE (same operation, different package) ===
+  the credential was issued for audit-lab/oidc-scope-test; can it publish into another package?
+  POST /api/packages/audit-lab/not-the-configured-package/artifacts/ -> 400
+  body: {"status":"error","message":"Invalid signature","documentationUrl":"https:\/\/packagist.com\/docs\/api"}
+
+  POST /api/suborganizations/sub-a/packages/artifacts/ -> 400
+  body: {"status":"error","message":"Invalid signature","documentationUrl":"https:\/\/packagist.com\/docs\/api"}
+
+=== STEP 4: OUT-OF-SCOPE READ PROBE ===
+  documented scope: only endpoints required to publish the artifact
+  GET  /api/teams/                            -> 404   {"status":"error","message":"Resource not found","documentat
+  GET  /api/credentials/                      -> 404   {"status":"error","message":"Resource not found","documentat
+  GET  /api/suborganizations/                 -> 404   {"status":"error","message":"Resource not found","documentat
+  GET  /api/packages/                         -> 404   {"status":"error","message":"Resource not found","documentat
+  GET  /api/vendor-bundles/                   -> 404   {"status":"error","message":"Resource not found","documentat
+  GET  /api/mirrored-repositories/            -> 404   {"status":"error","message":"Resource not found","documentat
+  GET  /api/customers/                        -> 404   {"status":"error","message":"Resource not found","documentat
+  GET  /api/organization/                     -> 404   {"status":"error","message":"Resource not found","documentat
+
+=== STEP 5: OUT-OF-SCOPE WRITE PROBE (own organization, non-destructive) ===
+  create team            POST /api/teams/              -> 404   {"status":"error","message":"Resource not found","documentationUrl":"h
+  create credential      POST /api/credentials/        -> 404   {"status":"error","message":"Resource not found","documentationUrl":"h
+  create composer token  POST /api/tokens/             -> 404   {"status":"error","message":"Resource not found","documentationUrl":"h
+
+=== STEP 6: REPEAT the in-scope control (stability) ===
+  POST /api/packages/artifacts/ (repeat)  -> 400
+  body: {"status":"error","message":"Invalid signature","documentationUrl":"https:\/\/packagist.com\/docs\/api"}

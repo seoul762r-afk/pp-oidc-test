@@ -1,0 +1,15 @@
+tag         : variation-env
+mode        : variation
+org         : audit-lab-gt
+package     : audit-lab/oidc-scope-test
+repository  : seoul762r-afk/pp-oidc-test
+workflow ref: seoul762r-afk/pp-oidc-test/.github/workflows/probe-v2.yml@refs/heads/main
+event       : push
+run id      : 37846370702
+
+=== EXCHANGE VARIATIONS (fresh OIDC token per attempt) ===
+  configured package                 HTTP 401    issued=False 
+  different package, same org        HTTP 401    issued=False 
+  other vendor namespace, same org   HTTP 401    issued=False 
+  package name with path chars       HTTP 404    issued=False {"status":"error","message":"Resource not found","documentationUrl":"https:\/\/packagist.com\/docs\/api"}
+  package name url-encoded slash     HTTP 401    issued=False 

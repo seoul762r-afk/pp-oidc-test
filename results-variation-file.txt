@@ -4,9 +4,8 @@ org         : audit-lab-gt
 package     : audit-lab/oidc-scope-test
 repository  : seoul762r-afk/pp-oidc-test
 workflow ref: seoul762r-afk/pp-oidc-test/.github/workflows/probe-v2-wrong-file.yml@refs/heads/main
-environment : (none)
 event       : push
-run id      : 37842286039
+run id      : 37842877988
 
 === EXCHANGE VARIATIONS (fresh OIDC token per attempt) ===
   configured package                 HTTP 401    issued=False 

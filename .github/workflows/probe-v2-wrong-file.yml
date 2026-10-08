@@ -1,0 +1,36 @@
+name: probe-v2-wrong-file
+
+on:
+  workflow_dispatch:
+  push:
+    paths-ignore:
+      - 'results-*.txt'
+
+permissions:
+  id-token: write
+  contents: write
+
+jobs:
+  wrong_file:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: probe from a workflow file the publisher does not name
+        env:
+          MODE: variation
+          TAG: variation-file
+        run: python3 probe2.py
+      - name: publish results
+        if: always()
+        run: |
+          git config user.name pp-oidc-probe
+          git config user.email pp-oidc-probe@users.noreply.github.com
+          for i in 1 2 3 4 5; do
+            git pull --rebase --autostash origin main || true
+            git add results-*.txt
+            git diff --cached --quiet && { echo nothing-to-commit; exit 0; }
+            git commit -m "results: variation-file run $GITHUB_RUN_ID" || true
+            git push && exit 0
+            sleep 5
+          done
+          exit 1

@@ -6,9 +6,35 @@ repository  : seoul762r-afk/pp-oidc-test
 workflow ref: seoul762r-afk/pp-oidc-test/.github/workflows/probe-v2.yml@refs/heads/main
 environment : (none)
 event       : push
-run id      : 37841301265
+run id      : 37842286123
 
 === EXCHANGE ===
-  POST /api/oidc/token-exchange/audit-lab-gt/audit-lab/oidc-scope-test -> HTTP 401
-  EXCHANGE FAILED: 
-  nothing further can be tested
+  POST /api/oidc/token-exchange/audit-lab-gt/audit-lab/oidc-scope-test -> HTTP 200
+  credential issued: key_len=42 secret_len=86
+
+=== IN-SCOPE CONTROL: the operation this credential exists for ===
+  POST /api/packages/artifacts/            -> 400
+  body: {"status":"error","message":"Mime type \u0022text\/plain\u0022 isn\u0027t allowed. The following mime types are supported: application\/gzip, application\/x-gzip, applica
+
+=== OUT-OF-SCOPE READ PROBE ===
+  documented scope: only endpoints required to publish the artifact
+  GET  /api/teams/                            -> 404
+  GET  /api/credentials/                      -> 404
+  GET  /api/suborganizations/                 -> 404
+  GET  /api/packages/                         -> 404
+  GET  /api/vendor-bundles/                   -> 404
+  GET  /api/mirrored-repositories/            -> 404
+  GET  /api/customers/                        -> 404
+  GET  /api/organization/                     -> 404
+
+=== OUT-OF-SCOPE WRITE PROBE (non-destructive, own organization) ===
+  POST /api/teams/                         -> 404
+  body: {"status":"error","message":"Resource not found","documentationUrl":"https:\/\/packagist.com\/docs\/api"}
+
+=== PRIVILEGE-ESCALATION PROBE: can it mint a wider credential? ===
+  POST /api/credentials/                   -> 404
+  body: {"status":"error","message":"Resource not found","documentationUrl":"https:\/\/packagist.com\/docs\/api"}
+
+=== TOKEN-SCOPE PROBE: can it mint a composer token? ===
+  POST /api/tokens/                        -> 404
+  body: {"status":"error","message":"Resource not found","documentationUrl":"https:\/\/packagist.com\/docs\/api"}

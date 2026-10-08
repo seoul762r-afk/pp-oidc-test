@@ -5,7 +5,7 @@ package     : audit-lab/oidc-scope-test
 repository  : seoul762r-afk/pp-oidc-test
 workflow ref: seoul762r-afk/pp-oidc-test/.github/workflows/probe-v2.yml@refs/heads/main
 event       : push
-run id      : 37844084653
+run id      : 37844953116
 
 === STEP 1: EXCHANGE (must succeed, or nothing below is interpretable) ===
   POST /api/oidc/token-exchange/audit-lab-gt/audit-lab/oidc-scope-test -> HTTP 200
@@ -14,18 +14,21 @@ run id      : 37844084653
 === STEP 2: IN-SCOPE CONTROL - publish an artifact ===
   the operation this credential exists for must SUCCEED, otherwise
   every later denial is uninterpretable
-  artifact: artifact.tar.gz, 61 bytes
-  POST /api/packages/artifacts/            -> 400
-  body: {"status":"error","message":"Invalid signature","documentationUrl":"https:\/\/packagist.com\/docs\/api"}
-  artifact id: None
+  artifact: artifact.zip, 259 bytes
+  POST /api/packages/artifacts/            -> 201
+  body: {"id":262548,"composerJson":{"name":"audit-lab\/oidc-scope-test","description":"Private Packagist OIDC scope test artifact","version":"1.0.0","type":"library","license":"MIT","require":[]}}
+  artifact id: 262548
+
+  POST /api/packages/ (create artifact package) -> 202
+  body: {"id":"3a6dfabc38aabd6e61f29c284a18521a91c4cd5c","status":"queued","nextJobIds":[],"message":null,"links":{"self":"\/api\/jobs\/3a6dfabc38aabd6e61f29c284a18521a91c4cd5c"}}
 
 === STEP 3: CROSS-PACKAGE WRITE (same operation, different package) ===
   the credential was issued for audit-lab/oidc-scope-test; can it publish into another package?
-  POST /api/packages/audit-lab/not-the-configured-package/artifacts/ -> 400
-  body: {"status":"error","message":"Invalid signature","documentationUrl":"https:\/\/packagist.com\/docs\/api"}
+  POST /api/packages/audit-lab/not-the-configured-package/artifacts/ -> 404
+  body: {"status":"error","message":"Resource not found","documentationUrl":"https:\/\/packagist.com\/docs\/api"}
 
-  POST /api/suborganizations/sub-a/packages/artifacts/ -> 400
-  body: {"status":"error","message":"Invalid signature","documentationUrl":"https:\/\/packagist.com\/docs\/api"}
+  POST /api/suborganizations/sub-a/packages/artifacts/ -> 404
+  body: {"status":"error","message":"Resource not found","documentationUrl":"https:\/\/packagist.com\/docs\/api"}
 
 === STEP 4: OUT-OF-SCOPE READ PROBE ===
   documented scope: only endpoints required to publish the artifact
@@ -44,5 +47,5 @@ run id      : 37844084653
   create composer token  POST /api/tokens/             -> 404   {"status":"error","message":"Resource not found","documentationUrl":"h
 
 === STEP 6: REPEAT the in-scope control (stability) ===
-  POST /api/packages/artifacts/ (repeat)  -> 400
-  body: {"status":"error","message":"Invalid signature","documentationUrl":"https:\/\/packagist.com\/docs\/api"}
+  POST /api/packages/artifacts/ (repeat)  -> 201
+  body: {"id":262549,"composerJson":{"name":"audit-lab\/oidc-scope-test","description":"Private Packagist OIDC scope test artifact","version":"1.0.0","type":"library","license":"MIT","require":[]}}
